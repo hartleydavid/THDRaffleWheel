@@ -37,18 +37,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    writing-mode: vertical-rl; /* Rotate text vertically */
+    
+}
+
+.segment-textContent {
+    position: relative;
+    font-size: 20px;
 }
 
 .segment:nth-child(odd) {
     background: #264653;
 }
-
-.segment:nth-child(1) { transform: rotate(0deg); }
-.segment:nth-child(2) { transform: rotate(60deg); }
-.segment:nth-child(3) { transform: rotate(120deg); }
-.segment:nth-child(4) { transform: rotate(180deg); }
-.segment:nth-child(5) { transform: rotate(240deg); }
-.segment:nth-child(6) { transform: rotate(300deg); }
 
 #spin-button {
     margin-top: 20px;
