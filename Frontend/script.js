@@ -12,28 +12,39 @@ function createWheel(prizes) {
         const segment = document.createElement('div');
         segment.className = 'segment';
         segment.style.transform = `rotate(${index * segmentAngle}deg)`;
-        segment.textContent = prize;
+
+        const text = document.createElement('span');
+        text.className = "segment-text";
+        text.style.transform = `rotate(${segmentAngle}deg)`;
+        text.textContent = prize;
+
+        //segment.textContent = prize;
+        segment.appendChild(text);
         wheel.appendChild(segment);
     });
 }
 
 // Spin functionality
 function spinWheel() {
+
     const randomAngle = Math.floor(Math.random() * 3600) + 360; // At least 10 full rotations
-    const currentRotation = parseFloat(wheel.style.transform.replace(/[^\d.]/g, '')) || 0;
-    const newRotation = currentRotation + randomAngle;
+    //const currentRotation = parseFloat(wheel.style.transform.replace(/[^\d.]/g, '')) || 0;
+    //const newRotation = currentRotation + randomAngle;
 
     // Animate the spin
     wheel.style.transition = 'transform 3s ease-out';
-    wheel.style.transform = `rotate(${newRotation}deg)`;
+    wheel.style.transform = `rotate(${randomAngle}deg)`;
 
     // Determine the winning segment
     setTimeout(() => {
-        const finalAngle = newRotation % 360;
+        const finalAngle = randomAngle % 360;//newRotation % 360;
         const segmentAngle = 360 / prizes.length;
         const winningIndex = Math.floor((360 - finalAngle + segmentAngle / 2) % 360 / segmentAngle);
         alert(`You won: ${prizes[winningIndex]}`);
+        wheel.style.transform = `rotate(0deg)`;
     }, 3000); // Match animation duration
+
+    
 }
 
 // Attach event listeners
