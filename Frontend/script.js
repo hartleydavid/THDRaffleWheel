@@ -114,6 +114,12 @@ function addUser() {
 
 //Function to add multiple users at once. Uses CSV style input
 function addMassUser() {
+    //Exit Case: Empty input field
+    if (massUsersInput.value.length == 0) {
+        //alert user of bad input
+        showAlert("Please enter a valid username.");
+        return;
+    }
     //Split the users by the comma seperating each value
     let usersList = massUsersInput.value.split(',');
     //List of duplicate users that have been removed
@@ -123,8 +129,9 @@ function addMassUser() {
     usersList.forEach(function (user) {
         //.trim() to remove the whitespace surrounding name
         formattedUser = user.trim();
+
         //Check if the string is currently in the list of users
-        if (users.includes(formattedUser)) {
+        if (users.includes(formattedUser) || formattedUser === "") {
             //If true, add to new list of skipped users
             removedUsers.push(formattedUser);
         } else {
@@ -136,7 +143,7 @@ function addMassUser() {
 
     //Alert the user of removed users
     if (removedUsers.length > 0) {
-        alert(`The following user(s) were removed: ${removedUsers}`);
+        alert(`The following user(s) were skipped: ${removedUsers}`);
     }
 
     //Update the wheel (list and reload the wheel)
