@@ -2,6 +2,7 @@
 const addUserBtn = document.getElementById('addUserBtn');
 const addMassUserBtn = document.getElementById('addMassUserBtn');
 const usernameInput = document.getElementById('username');
+const massUsersInput = document.getElementById('massUsers');
 const userList = document.getElementById('userList');
 const setPrizeBtn = document.getElementById('setPrizeBtn');
 const prizeInput = document.getElementById('prize');
@@ -10,11 +11,11 @@ const spinBtn = document.getElementById('spinBtn');
 const winnerModal = document.getElementById('winnerModal');
 const closeBtn = document.querySelector('.close-button');
 const winnerText = document.getElementById('winnerText');
-const shareBtn = document.getElementById('shareBtn');
-// State Variables
+
+// State Global Variables
 let users = [];
-let prize = "None";
 let isSpinning = false;
+
 // Wheel Configuration
 const canvas = document.getElementById('raffleWheel');
 const ctx = canvas.getContext('2d');
@@ -22,6 +23,7 @@ const wheelRadius = canvas.width / 2;
 const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', '#33FFF6', '#FFC300', '#DAF7A6'];
 let startAngle = 0;
 let arc = 0;
+
 // Initialize Wheel
 function initializeWheel() {
     if (users.length === 0) {
@@ -31,6 +33,7 @@ function initializeWheel() {
     arc = (2 * Math.PI) / users.length;
     drawWheel();
 }
+
 // Draw the Raffle Wheel
 function drawWheel() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,6 +58,7 @@ function drawWheel() {
     // Draw Pointer
     drawPointer();
 }
+
 // Draw the Pointer Arrow
 function drawPointer() {
     const pointerSize = 20;
@@ -66,12 +70,16 @@ function drawPointer() {
     ctx.closePath();
     ctx.fill();
 }
-// Add User Event
+
+// Add User Events
 addUserBtn.addEventListener('click', addUser);
 addMassUserBtn.addEventListener('click', addMassUser);
+
+//Quickly add individual users by pressing enter
 usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addUser();
 });
+
 // Function to Add a User
 function addUser() {
     const username = usernameInput.value.trim();
@@ -90,9 +98,41 @@ function addUser() {
 }
 
 //Function to add multiple users at once. Uses CSV style input
-function addMassUser(){
+function addMassUser() {
+    //Split the users by the comma seperating each value
+    let usersList = massUsersInput.value.split(',');
+    //List of duplicate users that have been removed
+    let removedUsers = []
+
+    //For the list of users entered
+    usersList.forEach(function(user){
+        //.trim() to remove the whitespace surrounding name
+        formattedUser = user.trim();
+        //Check if the string is currently in the list of users
+        if (users.includes(formattedUser)){
+            //If true, add to new list of skipped users
+            removedUsers.push(formattedUser);
+        }else{
+            //Add the user to the list
+            users.push(formattedUser);
+            
+        }   
+          
+    });
+
+    //Alert the user of removed users
+    if (removedUsers.length > 0){
+        alert(`The following user(s) were removed: ${removedUsers}`);
+    }
     
+    //Update the user list
+    updateUserList();
+    //reset the input field
+    massUsersInput.value = '';
+    //Initialize the wheel
+    initializeWheel();
 }
+
 // Update the User List UI
 function updateUserList() {
     userList.innerHTML = '';
@@ -159,25 +199,30 @@ function stopRotateWheel() {
     isSpinning = false;
     spinBtn.disabled = false;
 }
+
 // Easing Function for Smooth Animation
 function easeOut(t, b, c, d) {
     t /= d;
     t--;
     return c * (t * t * t + 1) + b;
 }
+
 // Function to Display Alerts
 function showAlert(message) {
     alert(message);
 }
+
 // Function to Show Winner in Modal
 function showWinner(winner) {
     winnerText.textContent = `${winner} has been eliminated!`;
     winnerModal.style.display = "block";
 }
+
 // Close Modal Events
 closeBtn.addEventListener('click', () => {
     winnerModal.style.display = "none";
 });
+
 window.addEventListener('click', (event) => {
     if (event.target === winnerModal) {
         winnerModal.style.display = "none";
