@@ -1,17 +1,188 @@
-document.getElementById('spin-button').addEventListener('click', () => {
-    const wheel = document.querySelector('.wheel');
-    const randomAngle = Math.random() * 360 + 3600; // At least 10 full spins + random
-    const currentRotation = parseFloat(wheel.style.transform.replace(/[^\d.]/g, '')) || 0;
-    const newRotation = currentRotation + randomAngle;
-
-    wheel.style.transition = 'transform 3s ease-out';
-    wheel.style.transform = `rotate(${newRotation}deg)`;
-
-    // Determine the prize (example with 6 segments)
-    setTimeout(() => {
-        const finalAngle = newRotation % 360;
-        const segmentAngle = 360 / 6;
-        const index = Math.floor((360 - finalAngle + segmentAngle / 2) / segmentAngle) % 6;
-        alert(`You won: Prize ${index + 1}`);
-    }, 3000); // Match animation duration
+// Selecting DOM Elements
+const addUserBtn = document.getElementById('addUserBtn');
+const addMassUserBtn = document.getElementById('addMassUserBtn');
+const usernameInput = document.getElementById('username');
+const userList = document.getElementById('userList');
+const setPrizeBtn = document.getElementById('setPrizeBtn');
+const prizeInput = document.getElementById('prize');
+const selectedPrize = document.getElementById('selectedPrize');
+const spinBtn = document.getElementById('spinBtn');
+const winnerModal = document.getElementById('winnerModal');
+const closeBtn = document.querySelector('.close-button');
+const winnerText = document.getElementById('winnerText');
+const shareBtn = document.getElementById('shareBtn');
+// State Variables
+let users = [];
+let prize = "None";
+let isSpinning = false;
+// Wheel Configuration
+const canvas = document.getElementById('raffleWheel');
+const ctx = canvas.getContext('2d');
+const wheelRadius = canvas.width / 2;
+const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', '#33FFF6', '#FFC300', '#DAF7A6'];
+let startAngle = 0;
+let arc = 0;
+// Initialize Wheel
+function initializeWheel() {
+    if (users.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+    }
+    arc = (2 * Math.PI) / users.length;
+    drawWheel();
+}
+// Draw the Raffle Wheel
+function drawWheel() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < users.length; i++) {
+        const angle = startAngle + i * arc;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.moveTo(wheelRadius, wheelRadius);
+        ctx.arc(wheelRadius, wheelRadius, wheelRadius, angle, angle + arc, false);
+        ctx.closePath();
+        ctx.fill();
+        // Draw User Names
+        ctx.save();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.translate(wheelRadius, wheelRadius);
+        ctx.rotate(angle + arc / 2);
+        ctx.textAlign = "right";
+        ctx.font = 'bold 16px Inter, sans-serif';
+        ctx.fillText(users[i], wheelRadius - 20, 10);
+        ctx.restore();
+    }
+    // Draw Pointer
+    drawPointer();
+}
+// Draw the Pointer Arrow
+function drawPointer() {
+    const pointerSize = 20;
+    ctx.fillStyle = '#FFEB3B';
+    ctx.beginPath();
+    ctx.moveTo(wheelRadius - pointerSize, 0);
+    ctx.lineTo(wheelRadius + pointerSize, 0);
+    ctx.lineTo(wheelRadius, -pointerSize * 1.5);
+    ctx.closePath();
+    ctx.fill();
+}
+// Add User Event
+addUserBtn.addEventListener('click', addUser);
+addMassUserBtn.addEventListener('click', addMassUser);
+usernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addUser();
 });
+// Function to Add a User
+function addUser() {
+    const username = usernameInput.value.trim();
+    if (username === "") {
+        showAlert("Please enter a valid username.");
+        return;
+    }
+    if (users.includes(username)) {
+        showAlert("This username is already added.");
+        return;
+    }
+    users.push(username);
+    updateUserList();
+    usernameInput.value = '';
+    initializeWheel();
+}
+
+//Function to add multiple users at once. Uses CSV style input
+function addMassUser(){
+    
+}
+// Update the User List UI
+function updateUserList() {
+    userList.innerHTML = '';
+    users.forEach(user => {
+        const li = document.createElement('li');
+        li.textContent = user;
+        userList.appendChild(li);
+    });
+}
+
+// Spin Button Event
+spinBtn.addEventListener('click', spinWheel);
+
+// Function to Spin the Wheel
+function spinWheel() {
+    //Exit Case: The wheel is currently spinning, do not spin again
+    if (isSpinning) return;
+    //We need to have at least one user to spin the wheel
+    if (users.length === 0) {
+        showAlert("Please add at least one user.");
+        return;
+    }
+
+    //The wheel is now spinning and cannot spin again until finished
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    //Generate a random spin angle and time of spin
+    const spinAngleStart = Math.random() * 10 + 10;
+    const spinTimeTotal = Math.random() * 3000 + 4000;
+    let spinTime = 0;
+
+    //Function to rotate the wheel (spinning)
+    function rotateWheel() {
+        //Increment the time spinning
+        spinTime += 30;
+        //If we exceed the spin time
+        if (spinTime >= spinTimeTotal) {
+            //Stop the wheel from spinning
+            stopRotateWheel();
+            return;
+        }
+
+        //Slowly stop the wheel from spinning
+        const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+        //Change the new spin angle after spinning the wheel
+        startAngle += (spinAngle * Math.PI / 180);
+
+        //Draw the wheel and animate the spinning
+        drawWheel();
+        requestAnimationFrame(rotateWheel);
+    }
+
+    //rotate the wheel
+    rotateWheel();
+}
+// Function to Stop the Wheel and Announce Winner
+function stopRotateWheel() {
+    const degrees = startAngle * 180 / Math.PI + 90;
+    const arcd = arc * 180 / Math.PI;
+    const index = Math.floor((360 - (degrees % 360)) / arcd) % users.length;
+    const winner = users[index];
+    showWinner(winner);
+    isSpinning = false;
+    spinBtn.disabled = false;
+}
+// Easing Function for Smooth Animation
+function easeOut(t, b, c, d) {
+    t /= d;
+    t--;
+    return c * (t * t * t + 1) + b;
+}
+// Function to Display Alerts
+function showAlert(message) {
+    alert(message);
+}
+// Function to Show Winner in Modal
+function showWinner(winner) {
+    winnerText.textContent = `${winner} has been eliminated!`;
+    winnerModal.style.display = "block";
+}
+// Close Modal Events
+closeBtn.addEventListener('click', () => {
+    winnerModal.style.display = "none";
+});
+window.addEventListener('click', (event) => {
+    if (event.target === winnerModal) {
+        winnerModal.style.display = "none";
+    }
+});
+
+// Initial Wheel Setup
+initializeWheel();
