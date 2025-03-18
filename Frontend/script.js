@@ -2,6 +2,7 @@
 const addUserBtn = document.getElementById('addUserBtn');
 const addMassUserBtn = document.getElementById('addMassUserBtn');
 const usernameInput = document.getElementById('username');
+const massUsersInput = document.getElementById('massUsers');
 const userList = document.getElementById('userList');
 const setPrizeBtn = document.getElementById('setPrizeBtn');
 const prizeInput = document.getElementById('prize');
@@ -10,11 +11,12 @@ const spinBtn = document.getElementById('spinBtn');
 const winnerModal = document.getElementById('winnerModal');
 const closeBtn = document.querySelector('.close-button');
 const winnerText = document.getElementById('winnerText');
-const shareBtn = document.getElementById('shareBtn');
-// State Variables
+const copyBtn = document.getElementById('copyBtn');
+
+// State Global Variables
 let users = [];
-let prize = "None";
 let isSpinning = false;
+
 // Wheel Configuration
 const canvas = document.getElementById('raffleWheel');
 const ctx = canvas.getContext('2d');
@@ -22,6 +24,7 @@ const wheelRadius = canvas.width / 2;
 const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', '#33FFF6', '#FFC300', '#DAF7A6'];
 let startAngle = 0;
 let arc = 0;
+
 // Initialize Wheel
 function initializeWheel() {
     if (users.length === 0) {
@@ -31,6 +34,7 @@ function initializeWheel() {
     arc = (2 * Math.PI) / users.length;
     drawWheel();
 }
+
 // Draw the Raffle Wheel
 function drawWheel() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -55,6 +59,7 @@ function drawWheel() {
     // Draw Pointer
     drawPointer();
 }
+
 // Draw the Pointer Arrow
 function drawPointer() {
     const pointerSize = 20;
@@ -66,33 +71,88 @@ function drawPointer() {
     ctx.closePath();
     ctx.fill();
 }
-// Add User Event
-addUserBtn.addEventListener('click', addUser);
-addMassUserBtn.addEventListener('click', addMassUser);
-usernameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addUser();
-});
-// Function to Add a User
-function addUser() {
-    const username = usernameInput.value.trim();
-    if (username === "") {
-        showAlert("Please enter a valid username.");
-        return;
-    }
-    if (users.includes(username)) {
-        showAlert("This username is already added.");
-        return;
-    }
-    users.push(username);
+
+//Function that will update the list of users and reinitialize the wheel for the new list
+function updateWheel() {
+    //Update the list of users and reload the wheel
     updateUserList();
-    usernameInput.value = '';
     initializeWheel();
 }
 
-//Function to add multiple users at once. Uses CSV style input
-function addMassUser(){
-    
+// Add User Events
+addUserBtn.addEventListener('click', addUser);
+addMassUserBtn.addEventListener('click', addMassUser);
+
+//Quickly add individual users by pressing enter
+usernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addUser();
+});
+
+// Function to Add a User
+function addUser() {
+    //Trim whitespace from name
+    const username = usernameInput.value.trim();
+    //If the field was empty
+    if (username === "") {
+        //alert user of bad input
+        showAlert("Please enter a valid username.");
+        return;
+    }
+    //If the name is already in the list
+    if (users.includes(username)) {
+        //Alert user of duplicate name
+        showAlert("This username is already added.");
+        return;
+    }
+    //Push name to the list
+    users.push(username);
+    //Update the wheel
+    updateWheel();
+    //Reset the input field
+    usernameInput.value = '';
 }
+
+//Function to add multiple users at once. Uses CSV style input
+function addMassUser() {
+    //Exit Case: Empty input field
+    if (massUsersInput.value.length == 0) {
+        //alert user of bad input
+        showAlert("Please enter a valid username.");
+        return;
+    }
+    //Split the users by the comma seperating each value
+    let usersList = massUsersInput.value.split(',');
+    //List of duplicate users that have been removed
+    let removedUsers = []
+
+    //For the list of users entered
+    usersList.forEach(function (user) {
+        //.trim() to remove the whitespace surrounding name
+        formattedUser = user.trim();
+
+        //Check if the string is currently in the list of users
+        if (users.includes(formattedUser) || formattedUser === "") {
+            //If true, add to new list of skipped users
+            removedUsers.push(formattedUser);
+        } else {
+            //Add the user to the list
+            users.push(formattedUser);
+        }
+
+    });
+
+    //Alert the user of removed users
+    if (removedUsers.length > 0) {
+        alert(`The following user(s) were skipped: ${removedUsers}`);
+    }
+
+    //Update the wheel (list and reload the wheel)
+    updateWheel();
+    //reset the input field
+    massUsersInput.value = '';
+
+}
+
 // Update the User List UI
 function updateUserList() {
     userList.innerHTML = '';
@@ -102,9 +162,6 @@ function updateUserList() {
         userList.appendChild(li);
     });
 }
-
-// Spin Button Event
-spinBtn.addEventListener('click', spinWheel);
 
 // Function to Spin the Wheel
 function spinWheel() {
@@ -154,35 +211,63 @@ function stopRotateWheel() {
     const degrees = startAngle * 180 / Math.PI + 90;
     const arcd = arc * 180 / Math.PI;
     const index = Math.floor((360 - (degrees % 360)) / arcd) % users.length;
-    const winner = users[index];
+    //Remove and return the "winner"
+    const winner = users.splice(index, 1)[0];
+    //Update
+    updateWheel();
+    //const winner = users[index];
     showWinner(winner);
     isSpinning = false;
     spinBtn.disabled = false;
 }
+
 // Easing Function for Smooth Animation
 function easeOut(t, b, c, d) {
     t /= d;
     t--;
     return c * (t * t * t + 1) + b;
 }
+
 // Function to Display Alerts
 function showAlert(message) {
     alert(message);
 }
+
 // Function to Show Winner in Modal
 function showWinner(winner) {
     winnerText.textContent = `${winner} has been eliminated!`;
     winnerModal.style.display = "block";
 }
+
 // Close Modal Events
 closeBtn.addEventListener('click', () => {
     winnerModal.style.display = "none";
 });
+
 window.addEventListener('click', (event) => {
     if (event.target === winnerModal) {
         winnerModal.style.display = "none";
     }
 });
+
+function copyUserList() {
+
+    navigator.clipboard.writeText(users.join(","))
+        .then(() => {
+            //alert("List of users have been copied!");
+            const copiedMsg = document.getElementById("copiedMessage");
+            copiedMsg.style.opacity = 1;
+
+            // Hide the message after 2 seconds
+            setTimeout(() => {
+                copiedMsg.style.opacity = 0;
+            }, 2000);
+        })
+        .catch(err => {
+            alert("Failed to copy: " + err)
+
+        });
+}
 
 // Initial Wheel Setup
 initializeWheel();
