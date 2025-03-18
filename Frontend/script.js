@@ -1,5 +1,6 @@
 // Selecting DOM Elements
 const addUserBtn = document.getElementById('addUserBtn');
+const addMassUserBtn = document.getElementById('addMassUserBtn');
 const usernameInput = document.getElementById('username');
 const userList = document.getElementById('userList');
 const setPrizeBtn = document.getElementById('setPrizeBtn');
@@ -67,6 +68,7 @@ function drawPointer() {
 }
 // Add User Event
 addUserBtn.addEventListener('click', addUser);
+addMassUserBtn.addEventListener('click', addMassUser);
 usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addUser();
 });
@@ -86,6 +88,11 @@ function addUser() {
     usernameInput.value = '';
     initializeWheel();
 }
+
+//Function to add multiple users at once. Uses CSV style input
+function addMassUser(){
+    
+}
 // Update the User List UI
 function updateUserList() {
     userList.innerHTML = '';
@@ -98,30 +105,48 @@ function updateUserList() {
 
 // Spin Button Event
 spinBtn.addEventListener('click', spinWheel);
+
 // Function to Spin the Wheel
 function spinWheel() {
+    //Exit Case: The wheel is currently spinning, do not spin again
     if (isSpinning) return;
+    //We need to have at least one user to spin the wheel
     if (users.length === 0) {
         showAlert("Please add at least one user.");
         return;
     }
 
+    //The wheel is now spinning and cannot spin again until finished
     isSpinning = true;
     spinBtn.disabled = true;
+
+    //Generate a random spin angle and time of spin
     const spinAngleStart = Math.random() * 10 + 10;
     const spinTimeTotal = Math.random() * 3000 + 4000;
     let spinTime = 0;
+
+    //Function to rotate the wheel (spinning)
     function rotateWheel() {
+        //Increment the time spinning
         spinTime += 30;
+        //If we exceed the spin time
         if (spinTime >= spinTimeTotal) {
+            //Stop the wheel from spinning
             stopRotateWheel();
             return;
         }
+
+        //Slowly stop the wheel from spinning
         const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+        //Change the new spin angle after spinning the wheel
         startAngle += (spinAngle * Math.PI / 180);
+
+        //Draw the wheel and animate the spinning
         drawWheel();
         requestAnimationFrame(rotateWheel);
     }
+
+    //rotate the wheel
     rotateWheel();
 }
 // Function to Stop the Wheel and Announce Winner
