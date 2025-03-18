@@ -11,6 +11,7 @@ const spinBtn = document.getElementById('spinBtn');
 const winnerModal = document.getElementById('winnerModal');
 const closeBtn = document.querySelector('.close-button');
 const winnerText = document.getElementById('winnerText');
+const copyBtn = document.getElementById('copyBtn');
 
 // State Global Variables
 let users = [];
@@ -71,6 +72,13 @@ function drawPointer() {
     ctx.fill();
 }
 
+//Function that will update the list of users and reinitialize the wheel for the new list
+function updateWheel() {
+    //Update the list of users and reload the wheel
+    updateUserList();
+    initializeWheel();
+}
+
 // Add User Events
 addUserBtn.addEventListener('click', addUser);
 addMassUserBtn.addEventListener('click', addMassUser);
@@ -82,19 +90,26 @@ usernameInput.addEventListener('keypress', (e) => {
 
 // Function to Add a User
 function addUser() {
+    //Trim whitespace from name
     const username = usernameInput.value.trim();
+    //If the field was empty
     if (username === "") {
+        //alert user of bad input
         showAlert("Please enter a valid username.");
         return;
     }
+    //If the name is already in the list
     if (users.includes(username)) {
+        //Alert user of duplicate name
         showAlert("This username is already added.");
         return;
     }
+    //Push name to the list
     users.push(username);
-    updateUserList();
+    //Update the wheel
+    updateWheel();
+    //Reset the input field
     usernameInput.value = '';
-    initializeWheel();
 }
 
 //Function to add multiple users at once. Uses CSV style input
@@ -105,32 +120,30 @@ function addMassUser() {
     let removedUsers = []
 
     //For the list of users entered
-    usersList.forEach(function(user){
+    usersList.forEach(function (user) {
         //.trim() to remove the whitespace surrounding name
         formattedUser = user.trim();
         //Check if the string is currently in the list of users
-        if (users.includes(formattedUser)){
+        if (users.includes(formattedUser)) {
             //If true, add to new list of skipped users
             removedUsers.push(formattedUser);
-        }else{
+        } else {
             //Add the user to the list
             users.push(formattedUser);
-            
-        }   
-          
+        }
+
     });
 
     //Alert the user of removed users
-    if (removedUsers.length > 0){
+    if (removedUsers.length > 0) {
         alert(`The following user(s) were removed: ${removedUsers}`);
     }
-    
-    //Update the user list
-    updateUserList();
+
+    //Update the wheel (list and reload the wheel)
+    updateWheel();
     //reset the input field
     massUsersInput.value = '';
-    //Initialize the wheel
-    initializeWheel();
+
 }
 
 // Update the User List UI
@@ -142,9 +155,6 @@ function updateUserList() {
         userList.appendChild(li);
     });
 }
-
-// Spin Button Event
-spinBtn.addEventListener('click', spinWheel);
 
 // Function to Spin the Wheel
 function spinWheel() {
@@ -194,7 +204,11 @@ function stopRotateWheel() {
     const degrees = startAngle * 180 / Math.PI + 90;
     const arcd = arc * 180 / Math.PI;
     const index = Math.floor((360 - (degrees % 360)) / arcd) % users.length;
-    const winner = users[index];
+    //Remove and return the "winner"
+    const winner = users.splice(index, 1)[0];
+    //Update
+    updateWheel();
+    //const winner = users[index];
     showWinner(winner);
     isSpinning = false;
     spinBtn.disabled = false;
@@ -228,6 +242,25 @@ window.addEventListener('click', (event) => {
         winnerModal.style.display = "none";
     }
 });
+
+function copyUserList() {
+
+    navigator.clipboard.writeText(users.join(","))
+        .then(() => {
+            //alert("List of users have been copied!");
+            const copiedMsg = document.getElementById("copiedMessage");
+            copiedMsg.style.opacity = 1;
+
+            // Hide the message after 2 seconds
+            setTimeout(() => {
+                copiedMsg.style.opacity = 0;
+            }, 2000);
+        })
+        .catch(err => {
+            alert("Failed to copy: " + err)
+
+        });
+}
 
 // Initial Wheel Setup
 initializeWheel();
