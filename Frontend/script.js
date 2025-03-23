@@ -6,6 +6,7 @@ let isSpinning = false;
 const canvas = document.getElementById('raffleWheel');
 const ctx = canvas.getContext('2d');
 const wheelRadius = canvas.width / 2;
+//The color options for each name
 const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', '#33FFF6', '#FFC300', '#DAF7A6'];
 let startAngle = 0;
 let arc = 0;

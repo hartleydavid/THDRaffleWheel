@@ -3,7 +3,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Stencil', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 body {
     background: linear-gradient(135deg, #F96302, #ff8432);
@@ -40,6 +40,7 @@ body {
 }
 /* Heading Styles */
 h1 {
+    font-family: 'Stencil', sans-serif;
     margin-bottom: 30px;
     font-size: 3rem;
     font-weight: 80;
