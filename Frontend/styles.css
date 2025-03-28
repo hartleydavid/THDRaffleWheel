@@ -6,7 +6,8 @@
     font-family: 'Inter', sans-serif;
 }
 body {
-    background: linear-gradient(135deg, #F96302, #ff8432);
+    /*background: linear-gradient(135deg, #F96302, #ff8432);*/
+    background-color: #1e3c72;
     color: #ffffff;
     display: flex;
     flex-direction: column; /* Stack children vertically */
@@ -18,7 +19,7 @@ body {
 }
 /* Container Styles */
 .container {
-    background: rgba(255, 255, 255, 0.05);
+    background: #F96302;
     backdrop-filter: blur(10px);
     padding: 40px;
     border-radius: 20px;
@@ -115,12 +116,7 @@ h1 {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 1rem;
 }
-/* Selected Prize */
-#selectedPrize {
-    font-size: 1.2rem;
-    font-weight: 500;
-    margin-top: 10px;
-}
+
 /* Wheel Container */
 .wheel-container {
     position: relative;
@@ -271,17 +267,24 @@ canvas {
   }
 
   .copy-container button {
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    background-color: #d35020;
-    color: white;
+    padding: 12px 25px;
     border: none;
-    border-radius: 4px;
+    border-radius: 30px;
+    background-color: #d35020;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
   }
 
   .copy-container button:hover {
-    background-color: #b9461d;
+    background-color: #ff5722;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .copied-message {
