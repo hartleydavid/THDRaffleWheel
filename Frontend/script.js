@@ -1,18 +1,3 @@
-// Selecting DOM Elements
-const addUserBtn = document.getElementById('addUserBtn');
-const addMassUserBtn = document.getElementById('addMassUserBtn');
-const usernameInput = document.getElementById('username');
-const massUsersInput = document.getElementById('massUsers');
-const userList = document.getElementById('userList');
-const setPrizeBtn = document.getElementById('setPrizeBtn');
-const prizeInput = document.getElementById('prize');
-const selectedPrize = document.getElementById('selectedPrize');
-const spinBtn = document.getElementById('spinBtn');
-const winnerModal = document.getElementById('winnerModal');
-const closeBtn = document.querySelector('.close-button');
-const winnerText = document.getElementById('winnerText');
-const copyBtn = document.getElementById('copyBtn');
-
 // State Global Variables
 let users = [];
 let isSpinning = false;
@@ -21,6 +6,7 @@ let isSpinning = false;
 const canvas = document.getElementById('raffleWheel');
 const ctx = canvas.getContext('2d');
 const wheelRadius = canvas.width / 2;
+//The color options for each name
 const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', '#33FFF6', '#FFC300', '#DAF7A6'];
 let startAngle = 0;
 let arc = 0;
@@ -80,32 +66,28 @@ function updateWheel() {
 }
 
 // Add User Events
-addUserBtn.addEventListener('click', addUser);
-addMassUserBtn.addEventListener('click', addMassUser);
-
-//Quickly add individual users by pressing enter
-usernameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addUser();
-});
+document.getElementById('addUserBtn').addEventListener('click', addUser);
+document.getElementById('addMassUserBtn').addEventListener('click', addMassUser);
 
 // Function to Add a User
 function addUser() {
+
     //Trim whitespace from name
-    const username = usernameInput.value.trim();
+    const name = document.getElementById('username').value.trim();
     //If the field was empty
-    if (username === "") {
+    if (name === "") {
         //alert user of bad input
-        showAlert("Please enter a valid username.");
+        showAlert("Please enter a valid name.");
         return;
     }
     //If the name is already in the list
-    if (users.includes(username)) {
+    if (users.includes(name)) {
         //Alert user of duplicate name
-        showAlert("This username is already added.");
+        showAlert("This name is already added.");
         return;
     }
     //Push name to the list
-    users.push(username);
+    users.push(name);
     //Update the wheel
     updateWheel();
     //Reset the input field
@@ -114,12 +96,16 @@ function addUser() {
 
 //Function to add multiple users at once. Uses CSV style input
 function addMassUser() {
+    //Get the input for mass users
+    const massUsersInput = document.getElementById('massUsers');
+
     //Exit Case: Empty input field
     if (massUsersInput.value.length == 0) {
         //alert user of bad input
         showAlert("Please enter a valid username.");
         return;
     }
+
     //Split the users by the comma seperating each value
     let usersList = massUsersInput.value.split(',');
     //List of duplicate users that have been removed
@@ -155,6 +141,7 @@ function addMassUser() {
 
 // Update the User List UI
 function updateUserList() {
+    const userList = document.getElementById('userList');
     userList.innerHTML = '';
     users.forEach(user => {
         const li = document.createElement('li');
@@ -175,7 +162,7 @@ function spinWheel() {
 
     //The wheel is now spinning and cannot spin again until finished
     isSpinning = true;
-    spinBtn.disabled = true;
+    document.getElementById('spinBtn').disabled = true;
 
     //Generate a random spin angle and time of spin
     const spinAngleStart = Math.random() * 10 + 10;
@@ -218,7 +205,7 @@ function stopRotateWheel() {
     //const winner = users[index];
     showWinner(winner);
     isSpinning = false;
-    spinBtn.disabled = false;
+    document.getElementById('spinBtn').disabled = false;
 }
 
 // Easing Function for Smooth Animation
@@ -235,16 +222,17 @@ function showAlert(message) {
 
 // Function to Show Winner in Modal
 function showWinner(winner) {
-    winnerText.textContent = `${winner} has been eliminated!`;
-    winnerModal.style.display = "block";
+    document.getElementById('winnerText').textContent = `${winner} has been eliminated!`;
+    document.getElementById('winnerModal').style.display = "block";
 }
 
 // Close Modal Events
-closeBtn.addEventListener('click', () => {
-    winnerModal.style.display = "none";
+document.querySelector('.close-button').addEventListener('click', () => {
+    document.getElementById('winnerModal').style.display = "none";
 });
 
 window.addEventListener('click', (event) => {
+    const winnerModal = document.getElementById('winnerModal');
     if (event.target === winnerModal) {
         winnerModal.style.display = "none";
     }
