@@ -198,14 +198,21 @@ function stopRotateWheel() {
     const degrees = startAngle * 180 / Math.PI + 90;
     const arcd = arc * 180 / Math.PI;
     const index = Math.floor((360 - (degrees % 360)) / arcd) % users.length;
+
     //Remove and return the "winner"
-    const winner = users.splice(index, 1)[0];
+    const eliminated = users.splice(index, 1)[0];
     //Update
     updateWheel();
     //const winner = users[index];
-    showWinner(winner);
+    showEliminated(eliminated);
     isSpinning = false;
     document.getElementById('spinBtn').disabled = false;
+
+    //TODO: If the list of users only has one value left. Display the true winner of the raffle
+    //If there is only one name left after spinning. We found the winner
+    if (users.length == 1 ){
+        showAlert(`${users[0]} is the winner!`);
+    }
 }
 
 // Easing Function for Smooth Animation
@@ -221,20 +228,20 @@ function showAlert(message) {
 }
 
 // Function to Show Winner in Modal
-function showWinner(winner) {
-    document.getElementById('winnerText').textContent = `${winner} has been eliminated!`;
-    document.getElementById('winnerModal').style.display = "block";
+function showEliminated(eliminated) {
+    document.getElementById('eliminatedText').textContent = `${eliminated} has been eliminated!`;
+    document.getElementById('eliminatedModal').style.display = "block";
 }
 
 // Close Modal Events
 document.querySelector('.close-button').addEventListener('click', () => {
-    document.getElementById('winnerModal').style.display = "none";
+    document.getElementById('eliminatedModal').style.display = "none";
 });
 
 window.addEventListener('click', (event) => {
-    const winnerModal = document.getElementById('winnerModal');
-    if (event.target === winnerModal) {
-        winnerModal.style.display = "none";
+    const eliminatedModal = document.getElementById('eliminatedModal');
+    if (event.target === eliminatedModal) {
+        eliminatedModal.style.display = "none";
     }
 });
 
