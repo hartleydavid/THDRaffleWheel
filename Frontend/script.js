@@ -281,6 +281,21 @@ function showWinner(winner) {
         document.getElementById('winnerText').textContent =
             `${winner} has won!`;
 
+        //Get the confetti elements
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const myConfetti = confetti.create(confettiCanvas, { resize: true, useWorker: true });
+        // Fire confetti multiple times for effect
+        let count = 0;
+        const interval = setInterval(() => {
+            myConfetti({
+                particleCount: 70,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            count++;
+            if (count > 5) clearInterval(interval);
+        }, 400);
+
         // Event handler to close modal and resolve promise
         function closeModal() {
             modal.style.display = "none";
