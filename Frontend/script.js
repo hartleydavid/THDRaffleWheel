@@ -154,9 +154,9 @@ function updateUserList() {
 function spinWheel() {
     //Exit Case: The wheel is currently spinning, do not spin again
     if (isSpinning) return;
-    //We need to have at least one user to spin the wheel
-    if (users.length === 0) {
-        showAlert("Please add at least one user.");
+    //We need to have at least two users to spin the wheel
+    if (users.length < 2) {
+        showAlert("Please add at least two users.");
         return;
     }
 
@@ -193,19 +193,27 @@ function spinWheel() {
     //rotate the wheel
     rotateWheel();
 }
+
 // Function to Stop the Wheel and Announce Winner
-function stopRotateWheel() {
+async function stopRotateWheel() {
     const degrees = startAngle * 180 / Math.PI + 90;
     const arcd = arc * 180 / Math.PI;
     const index = Math.floor((360 - (degrees % 360)) / arcd) % users.length;
+
     //Remove and return the "winner"
-    const winner = users.splice(index, 1)[0];
-    //Update
+    const eliminated = users.splice(index, 1)[0];
+    //Update wheel
     updateWheel();
-    //const winner = users[index];
-    showWinner(winner);
     isSpinning = false;
     document.getElementById('spinBtn').disabled = false;
+
+    //Wait for the user to close the modal before continuing logic
+    await showEliminated(eliminated);
+
+    //If there is only one name left after spinning. We found the winner
+    if (users.length === 1) {
+        showWinner(users[0]);
+    }
 }
 
 // Easing Function for Smooth Animation
@@ -220,24 +228,83 @@ function showAlert(message) {
     alert(message);
 }
 
-// Function to Show Winner in Modal
-function showWinner(winner) {
-    document.getElementById('winnerText').textContent = `${winner} has been eliminated!`;
-    document.getElementById('winnerModal').style.display = "block";
+/** "Async" function that displays the name that was eliminated from the raffle
+ * 
+ * @param {*} eliminated The name of the user that has been eliminated
+ * @returns A promise to have a similar effect to an async function
+ */
+function showEliminated(eliminated) {
+    return new Promise((resolve) => {
+        //Get the modal and close button elements
+        const modal = document.getElementById('eliminatedModal');
+        const closeBtn = modal.querySelector('.close-button');
+
+        //Set the text of the modal to be who was elimated
+        document.getElementById('eliminatedText').textContent =
+            `${eliminated} has been eliminated!`;
+
+        // Event handler to close modal and resolve promise
+        function closeModal() {
+            modal.style.display = "none";
+            closeBtn.removeEventListener('click', closeModal);
+            window.removeEventListener('click', outsideClick);
+            resolve(); // This tells the awaiting code to continue
+        }
+
+        //Close the modal if you click outside the area of it
+        function outsideClick(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        //Close the modal event listeners
+        closeBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', outsideClick);
+
+        modal.style.display = "block";
+    });
 }
 
-// Close Modal Events
-document.querySelector('.close-button').addEventListener('click', () => {
-    document.getElementById('winnerModal').style.display = "none";
-});
+/** "Aysnc" function that will display the winner of the raffle wheel
+ * 
+ * @param {*} winner The name of the winner 
+ * @returns A promise to replicate async functionality
+ */
+function showWinner(winner) {
+    return new Promise((resolve) => {
+        //Get the winner modal elements
+        const modal = document.getElementById('winnerModal');
+        const closeBtn = modal.querySelector('.close-button');
 
-window.addEventListener('click', (event) => {
-    const winnerModal = document.getElementById('winnerModal');
-    if (event.target === winnerModal) {
-        winnerModal.style.display = "none";
-    }
-});
+        //Change the text to have the winners name
+        document.getElementById('winnerText').textContent =
+            `${winner} has won!`;
 
+        // Event handler to close modal and resolve promise
+        function closeModal() {
+            modal.style.display = "none";
+            closeBtn.removeEventListener('click', closeModal);
+            window.removeEventListener('click', outsideClick);
+            resolve(); // This tells the awaiting code to continue
+        }
+
+        //Function to close the modal with clicking outside the box
+        function outsideClick(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        //Event listeners
+        closeBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', outsideClick);
+
+        modal.style.display = "block";
+    });
+}
+
+// Function that will copy the list of users that are currently in the raffle wheel
 function copyUserList() {
 
     navigator.clipboard.writeText(users.join(","))
