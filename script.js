@@ -281,6 +281,14 @@ function showWinner(winner) {
         document.getElementById('winnerText').textContent =
             `${winner} has won!`;
 
+        //Get Audio element
+        const audio = document.getElementById("celebrationSound");
+        //Play audio from the start of clip
+        audio.currentTime = 0; 
+        audio.play().catch(err => {
+            console.log("Autoplay prevented, will play after user interaction:", err);
+        });
+
         //Get the confetti elements
         const confettiCanvas = document.getElementById('confettiCanvas');
         const myConfetti = confetti.create(confettiCanvas, { resize: true, useWorker: true });
